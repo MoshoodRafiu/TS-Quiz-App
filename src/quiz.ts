@@ -1,124 +1,78 @@
-interface Question {
-	text: string;
-	options: string[];
-	answer?: string;
-}
+import { QuizUIManager } from "./quiz-ui-manager";
+import { Answer, Question } from "./types/interfaces";
 
-export function initQuiz() {
-	quizQuestions = getQuizQuestions();
+class Quiz {
+	private _answers: Answer[] = [];
+	private _questions: Question[] = [];
+	private _currentQuestionIndex: number = 0;
 
-	updateQuizUi();
-	totalQuestionCounter.textContent = quizQuestions.length.toString();
+	constructor() {}
 
-	prevQuestionButton.addEventListener("click", showPrevQuestion);
-	nextQuestionButton.addEventListener("click", showNextQuestion);
-	questionOptions.addEventListener("input", (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		const questionIndex: number = Number(target.dataset.question);
-		quizQuestions[questionIndex].answer = target.value;
-	});
-	questionBullets.addEventListener("click", (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		if (target.tagName === "SPAN") {
-			const questionIndex: number = Number(target.dataset.question);
-			showQuestion(questionIndex);
-		}
-	});
-}
-
-function showPrevQuestion(): void {
-	if (currentQuestionIndex === 0) return;
-	showQuestion(currentQuestionIndex - 1);
-}
-
-function showNextQuestion(): void {
-	if (currentQuestionIndex === quizQuestions.length - 1) return;
-	showQuestion(currentQuestionIndex + 1);
-}
-
-function showQuestion(questionIndex: number): void {
-	if (questionIndex < 0 || questionIndex >= quizQuestions.length) return;
-	currentQuestionIndex = questionIndex;
-	updateQuizUi();
-}
-
-function getQuizQuestions(): Question[] {
-	const questions: Question[] = [];
-	for (let i = 1; i < 51; i++) {
-		questions.push({ text: `Hi there ${i} ${Math.random()}`, options: ["name", "test"] });
-	}
-	return questions;
-}
-
-function updateQuizUi(): void {
-	const { text, options, answer } = quizQuestions[currentQuestionIndex];
-	questionText.textContent = text;
-
-	currentQuestionsCounter.textContent = (currentQuestionIndex + 1).toString();
-
-	updateQuestionOptionsUI(questionOptions, options, answer ?? "");
-	updateBottomQuestionNavigator(questionBullets, quizQuestions, currentQuestionIndex);
-}
-
-function updateQuestionOptionsUI(questionOptionsWrapper: HTMLDivElement, options: string[], answer: string): void {
-	let optionsHTMLString: string = "";
-	for (let i = 0; i < options.length; i++) {
-		optionsHTMLString += `
-      <div class="option my-2">
-        <input
-          type="radio"
-          name="answer-${currentQuestionIndex}"
-          value="${options[i]}"
-          id="option-${currentQuestionIndex}-${i + 1}"
-          data-question="${currentQuestionIndex}"
-          ${options[i] === answer ? "checked" : ""}
-        >
-        <label for="option-${currentQuestionIndex}-${i + 1}">${options[i]}</label>
-      </div>
-    `;
-	}
-	questionOptionsWrapper.innerHTML = optionsHTMLString;
-}
-
-function updateBottomQuestionNavigator(
-	bottomNavigationWrapper: HTMLDivElement,
-	questions: Question[],
-	currentQuestionIndex: number,
-): void {
-	let bulletHTMLString: string = "";
-
-	for (let i = 0; i < questions.length; i++) {
-		let btnStyle = "red-600";
-		if (questions[i].answer) {
-			btnStyle = "green-600";
-		}
-
-		if (i === currentQuestionIndex) {
-			btnStyle = "orange-500";
-		}
-
-		bulletHTMLString += `
-      <span
-        class="bullet cursor-pointer inline-block py-1 px-2 mb-1 text-xs rounded bg-${btnStyle}"
-        data-question="${i}"
-      >
-        ${i + 1}
-      </span>
-    `;
+	initalize(): void {
+		this.fetchQuestions();
+		this.addEventListeners();
+		QuizUIManager.setTotalQuestions(this._questions.length.toString());
+		this.updateUI();
 	}
 
-	bottomNavigationWrapper.innerHTML = bulletHTMLString;
+	fetchQuestions(): Question[] {
+		const questions: Question[] = [];
+		for (let i = 1; i < 51; i++) {
+			questions.push({ id: i, text: `Hi there ${i} ${Math.random()}`, options: ["name", "test"] });
+		}
+		this._questions = questions;
+		return this._questions;
+	}
+
+	addEventListeners(): void {
+		QuizUIManager.prevQuestionButton.addEventListener("click", (): void => {
+			this.updateCurrentQuestion(this._currentQuestionIndex - 1);
+		});
+		QuizUIManager.nextQuestionButton.addEventListener("click", (): void => {
+			this.updateCurrentQuestion(this._currentQuestionIndex + 1);
+		});
+		QuizUIManager.questionOptions.addEventListener("input", (event: Event): void => {
+			const target = event.target as HTMLInputElement;
+			const questionId: number = Number(target.dataset.question);
+			this.setAnswer(questionId, target.value);
+		});
+		QuizUIManager.questionBullets.addEventListener("click", (event: Event): void => {
+			const target = event.target as HTMLInputElement;
+			const questionId: number = Number(target.dataset.question);
+      if (target.tagName === "SPAN") {
+        const questionIndex = this._questions.findIndex(({ id }) => id === questionId);
+        this.updateCurrentQuestion(questionIndex);
+      }
+		});
+	}
+
+	updateCurrentQuestion(questionIndex: number) {
+		if (questionIndex < 0 || questionIndex >= this._questions.length) return;
+		this._currentQuestionIndex = questionIndex;
+		this.updateUI();
+	}
+
+	setAnswer(questionId: number, answer: string | number) {
+		const currentAnswer = this._answers.find((answer) => (answer.questionId === questionId));
+		if (currentAnswer) {
+			currentAnswer.value = answer;
+		} else {
+			this._answers.push({ questionId, value: answer });
+		}
+	}
+
+	getAnswer(questionId: number): Answer | null {
+		const answer = this._answers.find((answer) => answer.questionId === questionId);
+		return answer ?? null;
+	}
+
+	updateUI(): void {
+		const currentQuestion: Question = this._questions[this._currentQuestionIndex];
+		if (currentQuestion) {
+			QuizUIManager.updateCurrentQuestion(currentQuestion, this.getAnswer(currentQuestion.id));
+			QuizUIManager.updateQuestionQuickNavigator(this._questions, this._answers, this._currentQuestionIndex);
+		}
+	}
 }
 
-let quizQuestions: Question[] = [];
-let currentQuestionIndex: number = 0;
-
-const questionText = document.querySelector("#questionText") as HTMLDivElement;
-const questionOptions = document.querySelector("#questionOptions") as HTMLDivElement;
-const questionBullets = document.querySelector("#questionBullets") as HTMLDivElement;
-
-const prevQuestionButton = document.querySelector("#prevQuestionButton") as HTMLButtonElement;
-const nextQuestionButton = document.querySelector("#nextQuestionButton") as HTMLButtonElement;
-
-const totalQuestionCounter = document.querySelector("#totalQuestions") as HTMLSpanElement;
-const currentQuestionsCounter = document.querySelector("#currentQuestion") as HTMLSpanElement;
+export default new Quiz;

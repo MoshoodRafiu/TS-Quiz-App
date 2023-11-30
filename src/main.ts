@@ -1,6 +1,5 @@
 import './styles/index.css'
 
-import Quiz from './navigator';
+import Quiz from './quiz';
 
-// initQuiz();
-(new Quiz).initalize();
+Quiz.initalize();
