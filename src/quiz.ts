@@ -5,6 +5,8 @@ class Quiz {
 	private _answers: Answer[] = [];
 	private _questions: Question[] = [];
 	private _currentQuestionIndex: number = 0;
+	private _countdownSeconds: number = 0;
+	private _countdownInterval: number | null = null;
 
 	constructor() {}
 
@@ -15,20 +17,42 @@ class Quiz {
 
 	async prepare(): Promise<void> {
 		const cachedAnswersString: string | null = localStorage.getItem("quizQuestionsAnswers");
-		const cachedCurrentionIndex: string | null = localStorage.getItem("currentQuestionIndex");
-		this._currentQuestionIndex = cachedCurrentionIndex ? Number(cachedCurrentionIndex) : 0;
+		const cachedCurrentQuestionIndex: string | null = localStorage.getItem("currentQuestionIndex");
+		this._currentQuestionIndex = cachedCurrentQuestionIndex ? Number(cachedCurrentQuestionIndex) : 0;
 		this._answers = cachedAnswersString ? JSON.parse(cachedAnswersString) : [];
 
 		await this.fetchQuestions();
+		this.allocateTimeAndStartCountdown();
 		QuizUIManager.setTotalQuestions(this._questions.length.toString());
 		this.updateUI();
 	}
 
 	reset() {
+		clearInterval(this._countdownInterval!);
 		localStorage.removeItem("quizQuestions");
+		localStorage.removeItem("countdownSeconds");
 		localStorage.removeItem("currentQuestionIndex");
 		localStorage.removeItem("quizQuestionsAnswers");
 		this.prepare();
+	}
+
+	allocateTimeAndStartCountdown() {
+		const cachedCountdownSeconds: string | null = localStorage.getItem("countdownSeconds");
+		this._countdownSeconds = cachedCountdownSeconds
+			? Number(cachedCountdownSeconds)
+			: this._questions.length * 60 / 2;
+
+		this._countdownInterval = setInterval(() => {
+			this._countdownSeconds--;
+
+			localStorage.setItem("countdownSeconds", this._countdownSeconds.toString());
+			QuizUIManager.updateCountdownTimer(this._countdownSeconds);
+
+			if (this._countdownSeconds < 0) {
+				clearInterval(this._countdownInterval!);
+				this.submit();
+			}
+		}, 1000);
 	}
 
 	async fetchQuestions(): Promise<Question[]> {
@@ -93,18 +117,22 @@ class Quiz {
 		QuizUIManager.submitQuizButtons.forEach((button: Node): void => {
 			button.addEventListener("click", (): void => {
 				if (confirm("Are you sure you want to submit?")) {
-					let correctAnswers: number = 0;
-					for (let answer of this._answers) {
-						if (this._questions.find(({ id }) => id === answer.questionId)?.answer === answer.value) {
-							correctAnswers++;
-						}
-					}
-					const totalScore: number = (correctAnswers / this._questions.length) * 100;
-					alert(`Your total score is ${totalScore}%`);
-					this.reset();
+					this.submit();
 				}
 			});
 		});
+	}
+
+	submit() {
+		let correctAnswers: number = 0;
+		for (let answer of this._answers) {
+			if (this._questions.find(({ id }) => id === answer.questionId)?.answer === answer.value) {
+				correctAnswers++;
+			}
+		}
+		const totalScore: number = (correctAnswers / this._questions.length) * 100;
+		alert(`Your total score is ${totalScore}%`);
+		this.reset();
 	}
 
 	updateCurrentQuestion(questionIndex: number) {
@@ -145,6 +173,7 @@ class Quiz {
 			QuizUIManager.updateQuestionQuickNavigator(this._questions, this._answers, this._currentQuestionIndex);
 			QuizUIManager.togglePrevButtonDisplay(this._currentQuestionIndex === 0);
 			QuizUIManager.toggleNextButtonDisplay(this._currentQuestionIndex === this._questions.length - 1);
+			QuizUIManager.updateCountdownTimer(this._countdownSeconds);
 		}
 	}
 }

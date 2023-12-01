@@ -4,6 +4,7 @@ export class QuizUIManager {
 	static questionText = <HTMLDivElement>document.querySelector("#questionText");
 	static questionOptions = <HTMLDivElement>document.querySelector("#questionOptions");
 	static questionBullets = <HTMLDivElement>document.querySelector("#questionBullets");
+	static countdownTimer = <HTMLDivElement>document.querySelector("#countdownTimer");
 
 	static prevQuestionButton = <HTMLButtonElement>document.querySelector("#prevQuestionButton");
 	static nextQuestionButton = <HTMLButtonElement>document.querySelector("#nextQuestionButton");
@@ -85,5 +86,17 @@ export class QuizUIManager {
 		} else {
 			QuizUIManager.prevQuestionButton.disabled = false;
 		}
+	}
+
+	static updateCountdownTimer(seconds: number) {
+		if (seconds < 0) return;
+
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+
+		const formattedMinutes = String(minutes).padStart(2, '0');
+		const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+
+		QuizUIManager.countdownTimer.textContent = `${formattedMinutes}:${formattedSeconds}`;
 	}
 }

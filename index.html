@@ -18,9 +18,12 @@
 			<div class="flex justify-center items-center w-full min-h-screen font-sans">
 				<div class="md:w-2/3 md:m-0 m-5">
           <div class="md:flex justify-between items-center mb-7">
-            <h2 class="font-bold md:text-4xl text-2xl">
-							The TypeScript Quiz (<span id="currentQuestion">1</span>/<span id="totalQuestions">10</span>)
-						</h2>
+						<div class="flex items-end">
+							<h2 class="font-bold md:text-4xl text-xl">
+								The TypeScript Quiz (<span id="currentQuestion">1</span>/<span id="totalQuestions">10</span>)
+							</h2>
+							<div id="countdownTimer" class="ml-3 md:text-xl">00:00</div>
+						</div>
 						<div class="md:mt-0 mt-4">
 							<button id="generateNewQuestions" class="px-5 py-2 rounded bg-red-600 hover:bg-red-500">
 								Reset Questions <i class="fa-solid fa-rotate"></i>
