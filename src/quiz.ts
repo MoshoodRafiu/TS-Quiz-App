@@ -6,32 +6,41 @@ class Quiz {
 	private _questions: Question[] = [];
 	private _currentQuestionIndex: number = 0;
 
-	constructor() {}
+	constructor() {
+
+	}
 
 	async initalize(): Promise<void> {
-		await this.fetchQuestions();
 		this.addEventListeners();
+		this.prepareQuiz();
+	}
+
+	async prepareQuiz(): Promise<void> {
+		const cachedAnswersString: string | null = localStorage.getItem('quizQuestionsAnswers');
+		const cachedCurrentionIndex: string | null = localStorage.getItem('currentQuestionIndex');
+		this._currentQuestionIndex = cachedCurrentionIndex ? Number(cachedCurrentionIndex) : 0;
+		this._answers = cachedAnswersString ? JSON.parse(cachedAnswersString) : [];
+
+		await this.fetchQuestions();
 		QuizUIManager.setTotalQuestions(this._questions.length.toString());
 		this.updateUI();
 	}
 
-	async fetchQuestions(renewQuestions: boolean = false): Promise<Question[]> {
-		const storageQuestionString: string | null = localStorage.getItem('quizQuestions');
-		if (storageQuestionString && !renewQuestions) {
-			const cachedQuestions: Question[] = JSON.parse(storageQuestionString);
-			this._questions = cachedQuestions;
+	async fetchQuestions(): Promise<Question[]> {
+		const storageQuestionsString: string | null = localStorage.getItem('quizQuestions');
+		if (storageQuestionsString) {
+			this._questions = JSON.parse(storageQuestionsString);
 			return this._questions;
 		}
 
 		try {
-			const response = await fetch('https://opentdb.com/api.php?amount=50');
+			const response = await fetch('https://opentdb.com/api.php?amount=20');
 
 			if (!response.ok) {
 				throw new Error(`Error fetching questions. Status: ${response.status}`);
 			}
 
 			const data = await response.json();
-
 			const apiQuestions: ApiQuestion[] = data.results;
 
 			const questions: Question[] = apiQuestions.map((apiQuestion: any, index: number) => ({
@@ -73,8 +82,10 @@ class Quiz {
 		});
 		QuizUIManager.generateNewQuestionsButton.addEventListener('click', async (): Promise<void> => {
 			if (confirm('All your current selections will be lost, are you sure you want to generate new questions?')) {
-				await this.fetchQuestions(true);
-				this.updateUI();
+				localStorage.removeItem('quizQuestions');
+				localStorage.removeItem('currentQuestionIndex');
+				localStorage.removeItem('quizQuestionsAnswers');
+				this.prepareQuiz();
 			}
 		});
 	}
@@ -82,6 +93,7 @@ class Quiz {
 	updateCurrentQuestion(questionIndex: number) {
 		if (questionIndex < 0 || questionIndex >= this._questions.length) return;
 		this._currentQuestionIndex = questionIndex;
+		localStorage.setItem('currentQuestionIndex', this._currentQuestionIndex.toString());
 		this.updateUI();
 	}
 
@@ -92,6 +104,7 @@ class Quiz {
 		} else {
 			this._answers.push({ questionId, value: answer });
 		}
+		localStorage.setItem('quizQuestionsAnswers', JSON.stringify(this._answers));
 	}
 
 	getAnswer(questionId: number): Answer | null {
