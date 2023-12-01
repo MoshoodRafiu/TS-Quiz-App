@@ -58,7 +58,7 @@ export class QuizUIManager {
 
 			bulletHTMLString += `
         <span
-          class="bullet cursor-pointer inline-block py-1 px-2 mb-1 text-xs rounded bg-${btnStyle}"
+          class="bullet cursor-pointer inline-block py-1 px-2.5 mb-1 text-xs rounded bg-${btnStyle}"
           data-question="${questions[i].id}"
         >
           ${i + 1}
