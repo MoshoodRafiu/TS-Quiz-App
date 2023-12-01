@@ -25,7 +25,7 @@
 							<button id="generateNewQuestions" class="px-5 py-2 rounded bg-red-600 hover:bg-red-500">
 								Get New Questions <i class="fa-solid fa-rotate"></i>
 							</button>
-							<button id="submitQuiz" class="px-5 py-2 rounded bg-green-600 hover:bg-green-500">
+							<button class="px-5 py-2 rounded bg-green-600 hover:bg-green-500 submitQuiz">
 								Submit <i class="fa-solid fa-arrow-right"></i>
 							</button>
 						</div>
@@ -55,12 +55,17 @@
             </div>
 					</div>
 					<div class="flex justify-between mt-7">
-						<button id="prevQuestionButton" class="px-4 py-1 text-sm rounded bg-orange-500 hover:bg-orange-400">
+						<button id="prevQuestionButton" class="px-4 py-1 text-sm rounded bg-orange-500 hover:bg-orange-400 disabled:bg-gray-700">
 							<i class="fa-solid fa-angle-left"></i> Prev
 						</button>
-						<button id="nextQuestionButton" class="px-4 py-1 text-sm rounded bg-orange-500 hover:bg-orange-400">
-							Next <i class="fa-solid fa-angle-right"></i>
-						</button>
+						<div id="nextButtonWrapper">
+							<button id="nextQuestionButton" class="px-4 py-1 text-sm rounded bg-orange-500 hover:bg-orange-400">
+								Next <i class="fa-solid fa-angle-right"></i>
+							</button>
+							<button class="px-4 py-1 text-sm rounded bg-green-500 hover:bg-green-400 submitQuiz hidden">
+								Submit <i class="fa-solid fa-arrow-right"></i>
+							</button>
+						</div>
 					</div>
           <div id="questionBullets" class="mt-10">
             <span class="bullet py-1 px-2 text-xs rounded bg-red-600">1</span>

@@ -6,9 +6,7 @@ class Quiz {
 	private _questions: Question[] = [];
 	private _currentQuestionIndex: number = 0;
 
-	constructor() {
-
-	}
+	constructor() {}
 
 	async initalize(): Promise<void> {
 		this.addEventListeners();
@@ -16,8 +14,8 @@ class Quiz {
 	}
 
 	async prepare(): Promise<void> {
-		const cachedAnswersString: string | null = localStorage.getItem('quizQuestionsAnswers');
-		const cachedCurrentionIndex: string | null = localStorage.getItem('currentQuestionIndex');
+		const cachedAnswersString: string | null = localStorage.getItem("quizQuestionsAnswers");
+		const cachedCurrentionIndex: string | null = localStorage.getItem("currentQuestionIndex");
 		this._currentQuestionIndex = cachedCurrentionIndex ? Number(cachedCurrentionIndex) : 0;
 		this._answers = cachedAnswersString ? JSON.parse(cachedAnswersString) : [];
 
@@ -27,21 +25,21 @@ class Quiz {
 	}
 
 	reset() {
-		localStorage.removeItem('quizQuestions');
-		localStorage.removeItem('currentQuestionIndex');
-		localStorage.removeItem('quizQuestionsAnswers');
+		localStorage.removeItem("quizQuestions");
+		localStorage.removeItem("currentQuestionIndex");
+		localStorage.removeItem("quizQuestionsAnswers");
 		this.prepare();
 	}
 
 	async fetchQuestions(): Promise<Question[]> {
-		const storageQuestionsString: string | null = localStorage.getItem('quizQuestions');
+		const storageQuestionsString: string | null = localStorage.getItem("quizQuestions");
 		if (storageQuestionsString) {
 			this._questions = JSON.parse(storageQuestionsString);
 			return this._questions;
 		}
 
 		try {
-			const response = await fetch('https://opentdb.com/api.php?amount=20');
+			const response = await fetch("https://opentdb.com/api.php?amount=20");
 
 			if (!response.ok) {
 				throw new Error(`Error fetching questions. Status: ${response.status}`);
@@ -58,11 +56,11 @@ class Quiz {
 			}));
 
 			this._questions = questions;
-			localStorage.setItem('quizQuestions', JSON.stringify(this._questions));
+			localStorage.setItem("quizQuestions", JSON.stringify(this._questions));
 
 			return this._questions;
 		} catch (error: any) {
-			console.error('Error fetching questions:', error?.message);
+			console.error("Error fetching questions:", error?.message);
 			throw error;
 		}
 	}
@@ -82,46 +80,48 @@ class Quiz {
 		QuizUIManager.questionBullets.addEventListener("click", (event: Event): void => {
 			const target = event.target as HTMLInputElement;
 			const questionId: number = Number(target.dataset.question);
-      if (target.tagName === "SPAN") {
-        const questionIndex = this._questions.findIndex(({ id }) => id === questionId);
-        this.updateCurrentQuestion(questionIndex);
-      }
+			if (target.tagName === "SPAN") {
+				const questionIndex = this._questions.findIndex(({ id }) => id === questionId);
+				this.updateCurrentQuestion(questionIndex);
+			}
 		});
-		QuizUIManager.generateNewQuestionsButton.addEventListener('click', async (): Promise<void> => {
-			if (confirm('All your current selections will be lost, are you sure you want to generate new questions?')) {
+		QuizUIManager.generateNewQuestionsButton.addEventListener("click", async (): Promise<void> => {
+			if (confirm("All your current selections will be lost, are you sure you want to generate new questions?")) {
 				this.reset();
 			}
 		});
-		QuizUIManager.submitQuizButton.addEventListener('click', (): void => {
-			if (confirm('Are you sure you want to submit?')) {
-				let correctAnswers: number = 0;
-				for (let answer of this._answers) {
-					if (this._questions.find(({ id }) => id === answer.questionId)?.answer === answer.value) {
-						correctAnswers++;
+		QuizUIManager.submitQuizButtons.forEach((button: Node): void => {
+			button.addEventListener("click", (): void => {
+				if (confirm("Are you sure you want to submit?")) {
+					let correctAnswers: number = 0;
+					for (let answer of this._answers) {
+						if (this._questions.find(({ id }) => id === answer.questionId)?.answer === answer.value) {
+							correctAnswers++;
+						}
 					}
+					const totalScore: number = (correctAnswers / this._questions.length) * 100;
+					alert(`Your total score is ${totalScore}%`);
+					this.reset();
 				}
-				const totalScore: number = (correctAnswers / this._questions.length) * 100;
-				alert(`Your total score is ${totalScore}%`);
-				this.reset();
-			}
+			});
 		});
 	}
 
 	updateCurrentQuestion(questionIndex: number) {
 		if (questionIndex < 0 || questionIndex >= this._questions.length) return;
 		this._currentQuestionIndex = questionIndex;
-		localStorage.setItem('currentQuestionIndex', this._currentQuestionIndex.toString());
+		localStorage.setItem("currentQuestionIndex", this._currentQuestionIndex.toString());
 		this.updateUI();
 	}
 
 	setAnswer(questionId: number, answer: string | number) {
-		const currentAnswer = this._answers.find((answer) => (answer.questionId === questionId));
+		const currentAnswer = this._answers.find((answer) => answer.questionId === questionId);
 		if (currentAnswer) {
 			currentAnswer.value = answer;
 		} else {
 			this._answers.push({ questionId, value: answer });
 		}
-		localStorage.setItem('quizQuestionsAnswers', JSON.stringify(this._answers));
+		localStorage.setItem("quizQuestionsAnswers", JSON.stringify(this._answers));
 	}
 
 	getAnswer(questionId: number): Answer | null {
@@ -143,8 +143,10 @@ class Quiz {
 			QuizUIManager.currentQuestionCounter.textContent = (this._currentQuestionIndex + 1).toString();
 			QuizUIManager.updateCurrentQuestion(currentQuestion, this.getAnswer(currentQuestion.id));
 			QuizUIManager.updateQuestionQuickNavigator(this._questions, this._answers, this._currentQuestionIndex);
+			QuizUIManager.togglePrevButtonDisplay(this._currentQuestionIndex === 0);
+			QuizUIManager.toggleNextButtonDisplay(this._currentQuestionIndex === this._questions.length - 1);
 		}
 	}
 }
 
-export default new Quiz;
+export default new Quiz();

@@ -11,8 +11,10 @@ export class QuizUIManager {
 	static totalQuestionCounter = <HTMLSpanElement>document.querySelector("#totalQuestions");
 	static currentQuestionCounter = <HTMLSpanElement>document.querySelector("#currentQuestion");
 
-	static submitQuizButton = <HTMLButtonElement>document.querySelector("#submitQuiz");
+	static submitQuizButtons = <NodeList>document.querySelectorAll(".submitQuiz");
 	static generateNewQuestionsButton = <HTMLButtonElement>document.querySelector("#generateNewQuestions");
+
+	static bottomSubmitQuizButtons = <HTMLButtonElement>document.querySelector("#nextButtonWrapper .submitQuiz");
 
 	static setTotalQuestions(totalQuestions: string): void {
 		QuizUIManager.totalQuestionCounter.textContent = totalQuestions;
@@ -65,5 +67,23 @@ export class QuizUIManager {
 		}
 
 		QuizUIManager.questionBullets.innerHTML = bulletHTMLString;
+	}
+
+	static toggleNextButtonDisplay(canSubmit: boolean): void {
+		if (canSubmit) {
+			QuizUIManager.nextQuestionButton.classList.add('hidden');
+			QuizUIManager.bottomSubmitQuizButtons.classList.remove('hidden');
+		} else {
+			QuizUIManager.nextQuestionButton.classList.remove('hidden');
+			QuizUIManager.bottomSubmitQuizButtons.classList.add('hidden');
+		}
+	}
+
+	static togglePrevButtonDisplay(disable: boolean): void {
+		if (disable) {
+			QuizUIManager.prevQuestionButton.disabled = true;
+		} else {
+			QuizUIManager.prevQuestionButton.disabled = false;
+		}
 	}
 }
