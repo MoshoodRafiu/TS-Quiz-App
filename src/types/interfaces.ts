@@ -9,3 +9,9 @@ export interface Question {
 	options: string[];
 	answer?: string;
 }
+
+export interface ApiQuestion {
+	question: String,
+	correct_answer: string,
+	incorrect_answers: string[],
+}

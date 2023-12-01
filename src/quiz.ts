@@ -1,5 +1,5 @@
 import { QuizUIManager } from "./quiz-ui-manager";
-import { Answer, Question } from "./types/interfaces";
+import { Answer, Question, ApiQuestion } from "./types/interfaces";
 
 class Quiz {
 	private _answers: Answer[] = [];
@@ -8,20 +8,38 @@ class Quiz {
 
 	constructor() {}
 
-	initalize(): void {
-		this.fetchQuestions();
+	async initalize(): Promise<void> {
+		await this.fetchQuestions();
 		this.addEventListeners();
 		QuizUIManager.setTotalQuestions(this._questions.length.toString());
 		this.updateUI();
 	}
 
-	fetchQuestions(): Question[] {
-		const questions: Question[] = [];
-		for (let i = 1; i < 51; i++) {
-			questions.push({ id: i, text: `Hi there ${i} ${Math.random()}`, options: ["name", "test"] });
+	async fetchQuestions(): Promise<Question[]> {
+		try {
+			const response = await fetch('https://opentdb.com/api.php?amount=50');
+
+			if (!response.ok) {
+				throw new Error(`Error fetching questions. Status: ${response.status}`);
+			}
+
+			const data = await response.json();
+
+			const apiQuestions: ApiQuestion[] = data.results;
+
+			console.log(apiQuestions);
+
+			const questions: Question[] = apiQuestions.map((apiQuestion: any, index: number) => ({
+				id: index + 1,
+				text: apiQuestion.question,
+				options: [...apiQuestion.incorrect_answers, apiQuestion.correct_answer],
+			}));
+			this._questions = questions;
+			return this._questions;
+		} catch (error: any) {
+			console.error('Error fetching questions:', error?.message);
+			throw error;
 		}
-		this._questions = questions;
-		return this._questions;
 	}
 
 	addEventListeners(): void {

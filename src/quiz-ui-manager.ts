@@ -17,7 +17,7 @@ export class QuizUIManager {
 
 	static updateCurrentQuestion(question: Question, answer: Answer | null): void {
 		const { text, options } = question;
-		QuizUIManager.questionText.textContent = text;
+		QuizUIManager.questionText.innerHTML = text;
 
 		let optionsHTMLString: string = "";
 		for (let i = 0; i < options.length; i++) {
