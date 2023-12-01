@@ -12,10 +12,10 @@ class Quiz {
 
 	async initalize(): Promise<void> {
 		this.addEventListeners();
-		this.prepareQuiz();
+		this.prepare();
 	}
 
-	async prepareQuiz(): Promise<void> {
+	async prepare(): Promise<void> {
 		const cachedAnswersString: string | null = localStorage.getItem('quizQuestionsAnswers');
 		const cachedCurrentionIndex: string | null = localStorage.getItem('currentQuestionIndex');
 		this._currentQuestionIndex = cachedCurrentionIndex ? Number(cachedCurrentionIndex) : 0;
@@ -24,6 +24,13 @@ class Quiz {
 		await this.fetchQuestions();
 		QuizUIManager.setTotalQuestions(this._questions.length.toString());
 		this.updateUI();
+	}
+
+	reset() {
+		localStorage.removeItem('quizQuestions');
+		localStorage.removeItem('currentQuestionIndex');
+		localStorage.removeItem('quizQuestionsAnswers');
+		this.prepare();
 	}
 
 	async fetchQuestions(): Promise<Question[]> {
@@ -82,10 +89,20 @@ class Quiz {
 		});
 		QuizUIManager.generateNewQuestionsButton.addEventListener('click', async (): Promise<void> => {
 			if (confirm('All your current selections will be lost, are you sure you want to generate new questions?')) {
-				localStorage.removeItem('quizQuestions');
-				localStorage.removeItem('currentQuestionIndex');
-				localStorage.removeItem('quizQuestionsAnswers');
-				this.prepareQuiz();
+				this.reset();
+			}
+		});
+		QuizUIManager.submitQuizButton.addEventListener('click', (): void => {
+			if (confirm('Are you sure you want to submit?')) {
+				let correctAnswers: number = 0;
+				for (let answer of this._answers) {
+					if (this._questions.find(({ id }) => id === answer.questionId)?.answer === answer.value) {
+						correctAnswers++;
+					}
+				}
+				const totalScore: number = (correctAnswers / this._questions.length) * 100;
+				alert(`Your total score is ${totalScore}%`);
+				this.reset();
 			}
 		});
 	}
