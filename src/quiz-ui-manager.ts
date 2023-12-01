@@ -11,6 +11,8 @@ export class QuizUIManager {
 	static totalQuestionCounter = <HTMLSpanElement>document.querySelector("#totalQuestions");
 	static currentQuestionsCounter = <HTMLSpanElement>document.querySelector("#currentQuestion");
 
+	static generateNewQuestionsButton = <HTMLButtonElement>document.querySelector("#generateNewQuestions");
+
 	static setTotalQuestions(totalQuestions: string): void {
 		QuizUIManager.totalQuestionCounter.textContent = totalQuestions;
 	}

@@ -70,6 +70,12 @@ class Quiz {
         this.updateCurrentQuestion(questionIndex);
       }
 		});
+		QuizUIManager.generateNewQuestionsButton.addEventListener('click', async (): Promise<void> => {
+			if (confirm('All your current selections will be lost, are you sure you want to generate new questions?')) {
+				await this.fetchQuestions(true);
+				this.updateUI();
+			}
+		});
 	}
 
 	updateCurrentQuestion(questionIndex: number) {
