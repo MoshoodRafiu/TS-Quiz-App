@@ -15,7 +15,14 @@ class Quiz {
 		this.updateUI();
 	}
 
-	async fetchQuestions(): Promise<Question[]> {
+	async fetchQuestions(renewQuestions: boolean = false): Promise<Question[]> {
+		const storageQuestionString: string | null = localStorage.getItem('quizQuestions');
+		if (storageQuestionString && !renewQuestions) {
+			const cachedQuestions: Question[] = JSON.parse(storageQuestionString);
+			this._questions = cachedQuestions;
+			return this._questions;
+		}
+
 		try {
 			const response = await fetch('https://opentdb.com/api.php?amount=50');
 
@@ -34,6 +41,8 @@ class Quiz {
 			}));
 
 			this._questions = questions;
+			localStorage.setItem('quizQuestions', JSON.stringify(this._questions));
+
 			return this._questions;
 		} catch (error: any) {
 			console.error('Error fetching questions:', error?.message);
