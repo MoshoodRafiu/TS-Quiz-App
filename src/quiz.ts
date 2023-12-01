@@ -27,13 +27,12 @@ class Quiz {
 
 			const apiQuestions: ApiQuestion[] = data.results;
 
-			console.log(apiQuestions);
-
 			const questions: Question[] = apiQuestions.map((apiQuestion: any, index: number) => ({
 				id: index + 1,
 				text: apiQuestion.question,
 				options: [...apiQuestion.incorrect_answers, apiQuestion.correct_answer],
 			}));
+
 			this._questions = questions;
 			return this._questions;
 		} catch (error: any) {
