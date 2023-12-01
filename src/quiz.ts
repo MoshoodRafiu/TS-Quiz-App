@@ -39,7 +39,7 @@ class Quiz {
 		}
 
 		try {
-			const response = await fetch("https://opentdb.com/api.php?amount=20");
+			const response = await fetch("https://opentdb.com/api.php?amount=20&category=18&difficulty=easy");
 
 			if (!response.ok) {
 				throw new Error(`Error fetching questions. Status: ${response.status}`);
