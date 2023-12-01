@@ -30,7 +30,7 @@ class Quiz {
 			const questions: Question[] = apiQuestions.map((apiQuestion: any, index: number) => ({
 				id: index + 1,
 				text: apiQuestion.question,
-				options: [...apiQuestion.incorrect_answers, apiQuestion.correct_answer],
+				options: this.shuffleOptions([...apiQuestion.incorrect_answers, apiQuestion.correct_answer]),
 			}));
 
 			this._questions = questions;
@@ -81,6 +81,14 @@ class Quiz {
 	getAnswer(questionId: number): Answer | null {
 		const answer = this._answers.find((answer) => answer.questionId === questionId);
 		return answer ?? null;
+	}
+
+	shuffleOptions(options: string[]): string[] {
+		for (let i = options.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[options[i], options[j]] = [options[j], options[i]];
+		}
+		return options;
 	}
 
 	updateUI(): void {
