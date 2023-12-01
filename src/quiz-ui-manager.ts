@@ -9,7 +9,7 @@ export class QuizUIManager {
 	static nextQuestionButton = <HTMLButtonElement>document.querySelector("#nextQuestionButton");
 
 	static totalQuestionCounter = <HTMLSpanElement>document.querySelector("#totalQuestions");
-	static currentQuestionsCounter = <HTMLSpanElement>document.querySelector("#currentQuestion");
+	static currentQuestionCounter = <HTMLSpanElement>document.querySelector("#currentQuestion");
 
 	static generateNewQuestionsButton = <HTMLButtonElement>document.querySelector("#generateNewQuestions");
 

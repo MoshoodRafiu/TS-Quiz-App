@@ -37,6 +37,7 @@ class Quiz {
 			const questions: Question[] = apiQuestions.map((apiQuestion: any, index: number) => ({
 				id: index + 1,
 				text: apiQuestion.question,
+				answer: apiQuestion.correct_answer,
 				options: this.shuffleOptions([...apiQuestion.incorrect_answers, apiQuestion.correct_answer]),
 			}));
 
@@ -109,6 +110,7 @@ class Quiz {
 	updateUI(): void {
 		const currentQuestion: Question = this._questions[this._currentQuestionIndex];
 		if (currentQuestion) {
+			QuizUIManager.currentQuestionCounter.textContent = (this._currentQuestionIndex + 1).toString();
 			QuizUIManager.updateCurrentQuestion(currentQuestion, this.getAnswer(currentQuestion.id));
 			QuizUIManager.updateQuestionQuickNavigator(this._questions, this._answers, this._currentQuestionIndex);
 		}
